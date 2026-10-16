@@ -325,11 +325,12 @@ class Serializer(t.Generic[_TSerialized]):
         """
         f.write(self.dumps(obj, salt))
 
-    def loads(
-        self, s: str | bytes, salt: str | bytes | None = None, **kwargs: t.Any
-    ) -> t.Any:
+    def loads(self, s: str | bytes, salt: str | bytes | None = None) -> t.Any:
         """Reverse of :meth:`dumps`. Raises :exc:`.BadSignature` if the
         signature validation fails.
+
+        .. versionchanged:: 2.3
+            Unexpected keyword arguments are no longer accepted.
         """
         s = want_bytes(s)
         last_exception = None
@@ -344,7 +345,7 @@ class Serializer(t.Generic[_TSerialized]):
 
     def load(self, f: t.IO[t.Any], salt: str | bytes | None = None) -> t.Any:
         """Like :meth:`loads` but loads from a file."""
-        return self.loads(f.read(), salt)
+        return self.loads(f.read(), salt=salt)
 
     def loads_unsafe(
         self, s: str | bytes, salt: str | bytes | None = None
