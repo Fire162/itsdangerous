@@ -5,6 +5,7 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   ``Serializer.loads`` rejects unexpected keyword arguments such as ``max_age``. :issue:`429`
 
 
 Version 2.2.0

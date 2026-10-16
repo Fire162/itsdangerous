@@ -15,6 +15,7 @@ from itsdangerous.exc import BadSignature
 from itsdangerous.serializer import Serializer
 from itsdangerous.signer import _lazy_sha1
 from itsdangerous.signer import Signer
+from itsdangerous.url_safe import URLSafeSerializer
 
 
 @overload
@@ -182,6 +183,12 @@ class TestSerializer:
         for signer in unsigners:
             assert signer.digest_method == hashlib.sha256
 
+    def test_loads_unexpected_kwargs(self, serializer: Serializer, value: Any):
+        signed = serializer.dumps(value)
+
+        with pytest.raises(TypeError, match="unexpected keyword argument"):
+            serializer.loads(signed, invalid_arg=True)  # type: ignore[call-arg]
+
 
 def test_digests():
     factory = partial(Serializer, secret_key="dev key", salt="dev salt")
@@ -194,3 +201,12 @@ def test_digests():
         "[42].MKCz_0nXQqv7wKpfHZcRtJRmpT2T5uvs9YQsJEhJimqxc"
         "9bCLxG31QzS5uC8OVBI1i6jyOLAFNoKaF5ckO9L5Q"
     )
+
+
+@pytest.mark.parametrize("cls", (Serializer, URLSafeSerializer))
+def test_untimed_serializer_loads_rejects_max_age(cls: type[Serializer]):
+    serializer = cls(secret_key="secret-key")
+    signed = serializer.dumps({"id": 42})
+
+    with pytest.raises(TypeError, match="unexpected keyword argument 'max_age'"):
+        serializer.loads(signed, max_age=10)  # type: ignore[call-arg]
